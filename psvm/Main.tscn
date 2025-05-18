@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Main.gd" type="Script" id=1]
 [ext_resource path="res://Particle.tscn" type="PackedScene" id=2]
@@ -6,14 +6,27 @@
 [ext_resource path="res://Player.tscn" type="PackedScene" id=4]
 [ext_resource path="res://HUD.tscn" type="PackedScene" id=5]
 [ext_resource path="res://14970480729910.jpg" type="Texture" id=6]
+[ext_resource path="res://Enemy.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Boss.tscn" type="PackedScene" id=8]
 
 [node name="Main" type="Node"]
 script = ExtResource( 1 )
 ParticleScene = ExtResource( 2 )
 GameOverScene = ExtResource( 3 )
+EnemyScene = ExtResource( 7 )
+BossScene = ExtResource( 8 )
 
 [node name="SpawnTimer" type="Timer" parent="."]
 wait_time = 0.05
+autostart = true
+
+[node name="EnemySpawnTimer" type="Timer" parent="."]
+wait_time = 2.0
+autostart = true
+
+[node name="BossTimer" type="Timer" parent="."]
+wait_time = 15.0
+one_shot = true
 autostart = true
 
 [node name="Player" parent="." instance=ExtResource( 4 )]
@@ -30,6 +43,8 @@ motion_mirroring = Vector2( 1920, 1080 )
 position = Vector2( 489.796, 265.781 )
 texture = ExtResource( 6 )
 [connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
+[connection signal="timeout" from="EnemySpawnTimer" to="." method="_on_EnemySpawnTimer_timeout"]
+[connection signal="timeout" from="BossTimer" to="." method="_on_BossTimer_timeout"]
 [connection signal="emit_electron" from="Player" to="." method="_on_Player_emit_electron"]
 [connection signal="emit_green" from="Player" to="." method="_on_Player_emit_green"]
 [connection signal="emit_particle" from="Player" to="." method="_on_Player_emit_particle"]

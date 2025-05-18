@@ -2,12 +2,17 @@ extends Node
 
 export (PackedScene) var ParticleScene
 export (PackedScene) var GameOverScene
+export (PackedScene) var EnemyScene
+export (PackedScene) var BossScene
 
 var reality_radius = 700
 var spawn_radius = reality_radius - 10
 var particles: Array
 var particleCount = 0
 var maxParticleCount = 50
+var enemyCount = 0
+var maxEnemyCount = 5
+var bossSpawned = false
 var fps
 var message
 var isGameOver = false
@@ -23,27 +28,46 @@ func _process(delta):
 	message += "objects: " + String(get_children().size()) + "\n"
 	$HUD.display_main_debug(message)
 	$HUD.display_player_debug(String($Player.debug_log))
-	for child in get_children():
-		if (child.is_class("Particle")):
-			if ($Player.position.distance_to(child.position) > reality_radius):
-				remove_child(child)
-				particleCount -= 1
+        for child in get_children():
+                if (child.is_class("Particle")):
+                        if ($Player.position.distance_to(child.position) > reality_radius):
+                                remove_child(child)
+                                particleCount -= 1
+                elif (child.is_class("Enemy")):
+                        if ($Player.position.distance_to(child.position) > reality_radius):
+                                remove_child(child)
+                                enemyCount -= 1
 	if ($Player.electron_count == $Player.electron_count_max && !isGameOver):
 		end('WIN')
 	if (Input.is_action_pressed('ui_accept') && !isGameOver):
 		end('O')
 
 func _on_SpawnTimer_timeout():
-	if particleCount > maxParticleCount: return
-	var particle = ParticleScene.instance()
-	var particleAngle = rand_range(0, 2*PI)
+        if particleCount > maxParticleCount: return
+        var particle = ParticleScene.instance()
+        var particleAngle = rand_range(0, 2*PI)
 	var particleDirection = rand_range(0, 2*PI)
 	var speed = rand_range(0, particle.max_speed)
 	particle.position = $Player.position + Vector2(spawn_radius,0).rotated(particleAngle)
 	particle.velocity = Vector2(speed, 0).rotated(particleDirection)
 	particles.append(particle)
 	add_child(particle)
-	particleCount += 1
+        particleCount += 1
+
+func _on_EnemySpawnTimer_timeout():
+        if enemyCount >= maxEnemyCount: return
+        var enemy = EnemyScene.instance()
+        var angle = rand_range(0, 2*PI)
+        enemy.position = $Player.position + Vector2(spawn_radius, 0).rotated(angle)
+        add_child(enemy)
+        enemyCount += 1
+
+func _on_BossTimer_timeout():
+        if bossSpawned: return
+        var boss = BossScene.instance()
+        boss.position = $Player.position + Vector2(spawn_radius, 0)
+        add_child(boss)
+        bossSpawned = true
 
 func end(text):
 	isGameOver = true
